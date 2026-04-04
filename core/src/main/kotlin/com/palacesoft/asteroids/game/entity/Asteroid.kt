@@ -35,16 +35,18 @@ object AsteroidFactory {
         val velX    = cos(angle) * speed
         val velY    = sin(angle) * speed
         val rotSpd  = (rng.nextFloat() - 0.5f) * 120f
-        val verts   = 8 + rng.nextInt(5)
+        val verts   = 9 + rng.nextInt(4)
         val shape   = generateShape(size.radius, verts, rng)
         return Asteroid(x, y, velX, velY, rng.nextFloat() * 360f, rotSpd, size, shape)
     }
 
     private fun generateShape(radius: Float, verts: Int, rng: Random): FloatArray {
         val pts = FloatArray(verts * 2)
+        val angleStep = (2f * PI / verts).toFloat()
         for (i in 0 until verts) {
-            val a = (i.toFloat() / verts) * 2f * PI.toFloat()
-            val r = radius * (0.75f + rng.nextFloat() * 0.25f)
+            // Jitter both angle and radius for classic jagged look
+            val a = i * angleStep + (rng.nextFloat() - 0.5f) * angleStep * 0.7f
+            val r = radius * (0.55f + rng.nextFloat() * 0.45f)
             pts[i * 2]     = cos(a) * r
             pts[i * 2 + 1] = sin(a) * r
         }

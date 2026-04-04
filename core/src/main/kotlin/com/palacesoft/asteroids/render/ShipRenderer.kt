@@ -7,35 +7,46 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class ShipRenderer {
-    private val SHIP_COLOR   = Color(0f, 1f, 0.9f, 1f)
-    private val THRUST_COLOR = Color(0.4f, 0.7f, 1f, 1f)
+    private val WHITE = Color.WHITE.cpy()
     private var thrustFlicker = 0f
 
     fun update(delta: Float) { thrustFlicker += delta }
 
     fun render(sr: ShapeRenderer, ship: Ship) {
-        if (!ship.visible) return
         val rad = Math.toRadians(ship.rotation.toDouble()).toFloat()
-        val cosR = cos(rad); val sinR = sin(rad)
-        val r = ship.radius
+        val r   = ship.radius
 
-        val nx = cosR * r;  val ny = sinR * r
-        val lx = cos(rad + 2.5f) * r * 0.75f; val ly = sin(rad + 2.5f) * r * 0.75f
-        val rx = cos(rad - 2.5f) * r * 0.75f; val ry = sin(rad - 2.5f) * r * 0.75f
-        val bx = -cosR * r * 0.5f;            val by = -sinR * r * 0.5f
+        // Classic Asteroids ship: nose + two rear wings + rear notch
+        // Points in local space (rotation=0 means nose points right):
+        val nx  =  cos(rad) * r;            val ny  =  sin(rad) * r          // nose
+        val lx  =  cos(rad + 2.5f) * r * 0.85f; val ly  =  sin(rad + 2.5f) * r * 0.85f  // left wing
+        val rx  =  cos(rad - 2.5f) * r * 0.85f; val ry  =  sin(rad - 2.5f) * r * 0.85f  // right wing
+        // Rear notch (small indent at centre-back)
+        val bx  = -cos(rad) * r * 0.35f;   val by  = -sin(rad) * r * 0.35f
 
         sr.begin(ShapeRenderer.ShapeType.Line)
-        sr.color = SHIP_COLOR
+        sr.color = WHITE
+        // Hull: nose → left wing → notch → right wing → nose
         sr.line(ship.x + nx, ship.y + ny, ship.x + lx, ship.y + ly)
         sr.line(ship.x + lx, ship.y + ly, ship.x + bx, ship.y + by)
         sr.line(ship.x + bx, ship.y + by, ship.x + rx, ship.y + ry)
         sr.line(ship.x + rx, ship.y + ry, ship.x + nx, ship.y + ny)
 
+        // Cockpit: small inner triangle ~40% scale
+        val cr = r * 0.38f
+        val cnx = cos(rad) * cr;             val cny = sin(rad) * cr
+        val clx = cos(rad + 2.5f) * cr * 0.85f; val cly = sin(rad + 2.5f) * cr * 0.85f
+        val crx = cos(rad - 2.5f) * cr * 0.85f; val cry = sin(rad - 2.5f) * cr * 0.85f
+        sr.line(ship.x + cnx, ship.y + cny, ship.x + clx, ship.y + cly)
+        sr.line(ship.x + clx, ship.y + cly, ship.x + crx, ship.y + cry)
+        sr.line(ship.x + crx, ship.y + cry, ship.x + cnx, ship.y + cny)
+
+        // Thrust: two flickering lines from rear notch, visible every other ~0.05s
         if (ship.thrusting && (thrustFlicker % 0.1f) < 0.05f) {
-            sr.color = THRUST_COLOR
-            val flameLen = r * (1.2f + (Math.random() * 0.5f).toFloat())
-            sr.line(ship.x + lx, ship.y + ly, ship.x - cosR * flameLen, ship.y - sinR * flameLen)
-            sr.line(ship.x - cosR * flameLen, ship.y - sinR * flameLen, ship.x + rx, ship.y + ry)
+            val flameLen = r * (1.1f + (Math.random() * 0.4f).toFloat())
+            val ex = -cos(rad) * flameLen; val ey = -sin(rad) * flameLen
+            sr.line(ship.x + lx, ship.y + ly, ship.x + ex, ship.y + ey)
+            sr.line(ship.x + ex, ship.y + ey, ship.x + rx, ship.y + ry)
         }
         sr.end()
     }

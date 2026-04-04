@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.palacesoft.asteroids.game.entity.Saucer
 
 class SaucerRenderer {
-    private val COLOR = Color(1f, 0.2f, 1f, 1f)
+    private val COLOR = Color.WHITE.cpy()
 
     fun render(sr: ShapeRenderer, saucers: List<Saucer>) {
         if (saucers.none { it.alive }) return

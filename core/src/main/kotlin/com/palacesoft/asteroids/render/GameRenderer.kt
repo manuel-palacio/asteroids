@@ -31,7 +31,7 @@ class GameRenderer(
     }
 
     fun render(world: World, shakeOffX: Float = 0f, shakeOffY: Float = 0f) {
-        Gdx.gl.glClearColor(0f, 0f, 0.03f, 1f)
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
         // Camera with shake applied to game world passes
@@ -50,11 +50,15 @@ class GameRenderer(
         saucerRend.render(sr, world.saucers)
         if (world.ship.visible) shipRenderer.render(sr, world.ship)
 
-        // Pass 3: Bullets (filled circles)
-        sr.begin(ShapeRenderer.ShapeType.Filled)
-        sr.color = com.badlogic.gdx.graphics.Color(1f, 1f, 0.2f, 1f)
+        // Pass 3: Bullets — short white lines in direction of travel
+        sr.begin(ShapeRenderer.ShapeType.Line)
+        sr.color = com.badlogic.gdx.graphics.Color.WHITE
         for (b in world.bullets) {
-            if (b.alive) sr.circle(b.x, b.y, b.radius)
+            if (!b.alive) continue
+            val spd = kotlin.math.sqrt(b.velX * b.velX + b.velY * b.velY).takeIf { it > 0f } ?: 1f
+            val dx = b.velX / spd * 7f
+            val dy = b.velY / spd * 7f
+            sr.line(b.x - dx, b.y - dy, b.x + dx, b.y + dy)
         }
         sr.end()
         bloomPass?.render()

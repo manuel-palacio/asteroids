@@ -53,7 +53,7 @@ class World {
     }
 
     private fun updateShip(delta: Float) {
-        if (!ship.alive) return
+        if (!ship.alive) { ship.visible = false; return }
         if (ship.invulnerableTimer > 0f) {
             ship.invulnerableTimer -= delta
             ship.flickerAccum += delta

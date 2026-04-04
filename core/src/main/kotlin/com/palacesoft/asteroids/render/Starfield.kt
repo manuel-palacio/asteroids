@@ -38,8 +38,8 @@ class Starfield {
         sr.begin(ShapeRenderer.ShapeType.Point)
         stars.forEach { s ->
             val twinkle = 0.5f + 0.5f * sin((time * s.twinkleSpeed).toDouble()).toFloat()
-            val b = s.brightness * (0.6f + 0.4f * twinkle)
-            sr.color = Color(b * 0.7f, b * 0.8f, b, 1f)
+            val b = s.brightness * (0.12f + 0.08f * twinkle)
+            sr.color = Color(b, b, b, 1f)
             sr.point(s.x, s.y, 0f)
         }
         sr.end()

@@ -7,7 +7,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class AsteroidRenderer {
-    private val COLOR = Color(0.85f, 0.85f, 0.85f, 1f)
+    private val COLOR = Color.WHITE.cpy()
 
     fun render(sr: ShapeRenderer, asteroids: List<Asteroid>) {
         if (asteroids.none { it.alive }) return
