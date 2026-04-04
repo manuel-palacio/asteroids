@@ -35,7 +35,8 @@ class GameScreen(private val game: AsteroidsGame) : Screen {
         world.update(dt)
         vfx.update(dt)
         vfx.updateThrust(dt, world.ship)
-        sounds.update(dt, world.asteroids.size, world.ship.thrusting && world.ship.alive,
+        sounds.update(dt, world.asteroids.size, world.wave, world.score,
+              world.ship.thrusting && world.ship.alive,
               world.saucers.any { it.alive })
         renderer.update(dt, world)
         renderer.render(world, vfx.offsetX, vfx.offsetY)

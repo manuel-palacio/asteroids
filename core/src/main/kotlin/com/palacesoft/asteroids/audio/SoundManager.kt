@@ -21,6 +21,7 @@ class SoundManager {
     val saucerFire = loadSound(genSaucerFire())
     val thrust     = loadSound(genThrust())
     val saucerWarp = loadSound(genSaucerWarble())
+    val extraLife  = loadSound(genExtraLife())
 
     private var thrustId      = -1L
     private var saucerWarpId  = -1L
@@ -28,8 +29,11 @@ class SoundManager {
     private var saucerPlaying = false
 
     private var beatTimer    = 0f
-    private var beatInterval = 0.9f
+    private var beatInterval = 1.0f
     private var nextBeat     = 0
+
+    private var lastScore       = 0
+    private val extraLifeEvery  = 10_000
 
     // ── synthesis helpers ────────────────────────────────────────────────────
 
@@ -141,6 +145,24 @@ class SoundManager {
         return toWav(normalize(lowPass(raw, 900f), 0.55f))
     }
 
+    private fun genExtraLife(): ByteArray {
+        // Short "ding-thump": a bright high ping followed immediately by a low punchy boom
+        val dur = 0.35f;  val n = (SR * dur).toInt()
+        val rng = java.util.Random(99L)
+        val raw = DoubleArray(n) { i ->
+            val t = i.toDouble() / SR
+            // High ping: 880 Hz sine, fast attack, medium decay
+            val ping  = sin(2.0 * PI * 880.0 * t) * exp(-t / 0.04) * 0.7
+            // Low thump: 55 Hz sine + octave, punchy with slower decay
+            val thump = (sin(2.0 * PI * 55.0 * t) + sin(2.0 * PI * 110.0 * t) * 0.4) *
+                        exp(-t / 0.12) * 0.9
+            // Transient click
+            val click = rng.nextGaussian() * exp(-t / 0.005) * 0.3
+            ping + thump + click
+        }
+        return toWav(normalize(raw, 0.92f))
+    }
+
     private fun genSaucerFire(): ByteArray {
         val dur = 0.06f;  val n = (SR * dur).toInt()
         var phase = 0.0
@@ -177,11 +199,24 @@ class SoundManager {
 
     // ── public API ────────────────────────────────────────────────────────────
 
-    fun update(delta: Float, asteroidCount: Int, thrusting: Boolean, hasSaucer: Boolean) {
+    fun update(delta: Float, asteroidCount: Int, wave: Int, score: Int,
+               thrusting: Boolean, hasSaucer: Boolean) {
         if (!Settings.sfxEnabled) return
 
-        // Heartbeat
-        beatInterval = (0.85f - asteroidCount.coerceAtMost(12) * 0.055f).coerceAtLeast(0.22f)
+        // Extra life at every 10 000 pts
+        val prevThreshold = lastScore / extraLifeEvery
+        val currThreshold = score    / extraLifeEvery
+        if (currThreshold > prevThreshold) extraLife.play(0.95f)
+        lastScore = score
+
+        // Heartbeat: SLOW when many asteroids, FAST when hunting last few.
+        // Each wave raises the baseline speed slightly (later waves are already tenser).
+        val waveSpeedup  = (wave * 0.05f).coerceAtMost(0.45f)
+        val maxInterval  = (1.0f - waveSpeedup).coerceAtLeast(0.4f)   // e.g. wave 1 → 1.0s, wave 9 → 0.55s
+        val minInterval  = 0.18f                                        // fastest: hunting last asteroid
+        val astFraction  = asteroidCount.coerceAtMost(16).toFloat() / 16f
+        beatInterval     = minInterval + astFraction * (maxInterval - minInterval)
+
         beatTimer += delta
         if (beatTimer >= beatInterval) {
             beatTimer -= beatInterval
@@ -214,6 +249,6 @@ class SoundManager {
     fun dispose() {
         thrust.stop(); saucerWarp.stop()
         listOf(fire, bangLarge, bangMedium, bangSmall, bangShip,
-               beat1, beat2, saucerFire, thrust, saucerWarp).forEach { it.dispose() }
+               beat1, beat2, saucerFire, thrust, saucerWarp, extraLife).forEach { it.dispose() }
     }
 }
