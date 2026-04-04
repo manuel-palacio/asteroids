@@ -29,6 +29,8 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    implementation("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
     implementation("com.badlogicgames.gdx:gdx-backend-android:$gdxVersion")
     natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a")
     natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a")
@@ -41,7 +43,9 @@ dependencies {
 tasks.register("copyAndroidNatives") {
     doFirst {
         natives.files.forEach { jar ->
-            val outputDir = file("libs/${jar.nameWithoutExtension.substringAfterLast('-')}")
+            val name = jar.nameWithoutExtension
+            val abi = name.substringAfter("natives-")
+            val outputDir = file("libs/$abi")
             outputDir.mkdirs()
             copy { from(zipTree(jar)); into(outputDir); include("*.so") }
         }

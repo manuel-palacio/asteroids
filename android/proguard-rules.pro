@@ -1,0 +1,4 @@
+-keep class com.badlogic.** { *; }
+-keep interface com.badlogic.** { *; }
+-keepclassmembers class com.badlogic.** { *; }
+-keep class com.palacesoft.asteroids.** { *; }
