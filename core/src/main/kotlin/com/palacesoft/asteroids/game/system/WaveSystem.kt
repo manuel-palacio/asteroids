@@ -82,6 +82,7 @@ class WaveSystem(private val world: World) {
                 world.bulletPool.acquireForSaucer(
                     saucer, world.ship.x, world.ship.y, world.bullets, spread
                 )
+                world.sounds?.playSaucerFire()
             }
             if (saucer.x < -60f || saucer.x > Settings.WORLD_WIDTH + 60f) saucer.alive = false
         }

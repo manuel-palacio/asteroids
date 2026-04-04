@@ -6,106 +6,212 @@ import com.palacesoft.asteroids.util.Settings
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import kotlin.math.PI
-import kotlin.math.sin
+import kotlin.math.*
 
 class SoundManager {
-    private val SAMPLE_RATE = 22050
+    private val SR = 22050
 
-    val fire        = loadSound(generateFire())
-    val bangLarge   = loadSound(generateNoise(0.45f, 0.75f))
-    val bangMedium  = loadSound(generateNoise(0.28f, 0.65f))
-    val bangSmall   = loadSound(generateNoise(0.15f, 0.55f))
-    val bangShip    = loadSound(generateNoise(0.6f, 0.85f))
-    val beat1       = loadSound(generateBeat(110.0, 0.07f))
-    val beat2       = loadSound(generateBeat(98.0,  0.07f))
+    val fire       = loadSound(genLaserFire())
+    val bangLarge  = loadSound(genBang(0.5f,  60f,  0.9f))
+    val bangMedium = loadSound(genBang(0.3f,  110f, 0.75f))
+    val bangSmall  = loadSound(genBang(0.18f, 180f, 0.6f))
+    val bangShip   = loadSound(genShipDeath())
+    val beat1      = loadSound(genBeat(72.0,  0.09f))
+    val beat2      = loadSound(genBeat(84.0,  0.09f))
+    val saucerFire = loadSound(genSaucerFire())
+    val thrust     = loadSound(genThrust())
+    val saucerWarp = loadSound(genSaucerWarble())
+
+    private var thrustId      = -1L
+    private var saucerWarpId  = -1L
+    private var thrustPlaying = false
+    private var saucerPlaying = false
 
     private var beatTimer    = 0f
     private var beatInterval = 0.9f
     private var nextBeat     = 0
 
-    private fun generateBeat(freq: Double, duration: Float): ByteArray {
-        val samples = (SAMPLE_RATE * duration).toInt()
-        val pcm = ShortArray(samples) { i ->
-            val t = i.toDouble() / SAMPLE_RATE
-            val env = 1.0 - t / duration
-            (sin(2.0 * PI * freq * t) * env * Short.MAX_VALUE * 0.85).toInt().toShort()
-        }
-        return toWav(pcm)
+    // ── synthesis helpers ────────────────────────────────────────────────────
+
+    private fun sawtooth(phase: Double) = 2.0 * (phase - floor(phase)) - 1.0
+    private fun square(phase: Double)   = if (phase % 1.0 < 0.5) 1.0 else -1.0
+
+    private fun lowPass(buf: DoubleArray, cutHz: Float): DoubleArray {
+        val alpha = (1.0 / (2.0 * PI * cutHz)) .let { rc -> 1.0 / SR / (rc + 1.0 / SR) }
+        var prev = 0.0
+        return DoubleArray(buf.size) { i -> prev += alpha * (buf[i] - prev); prev }
     }
 
-    private fun generateFire(): ByteArray {
-        val duration = 0.1f
-        val samples = (SAMPLE_RATE * duration).toInt()
+    private fun normalize(buf: DoubleArray, peak: Float): ShortArray {
+        val mx = buf.maxOf { abs(it) }.takeIf { it > 0.0 } ?: 1.0
+        return ShortArray(buf.size) { i ->
+            (buf[i] / mx * peak * Short.MAX_VALUE)
+                .toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
+        }
+    }
+
+    // ── individual generators ─────────────────────────────────────────────────
+
+    private fun genBeat(freq: Double, dur: Float): ByteArray {
+        val n = (SR * dur).toInt()
+        val rng = java.util.Random(7L)
+        val raw = DoubleArray(n) { i ->
+            val t = i.toDouble() / SR
+            val env = exp(-t / (dur * 0.35))
+            sin(2.0 * PI * freq * t) * env * 0.85 +
+            rng.nextGaussian() * exp(-t / (dur * 0.15)) * 0.08
+        }
+        return toWav(normalize(raw, 0.82f))
+    }
+
+    private fun genLaserFire(): ByteArray {
+        val dur = 0.08f;  val n = (SR * dur).toInt()
+        var phase = 0.0
+        val raw = DoubleArray(n) { i ->
+            val t = i.toDouble() / SR
+            val frac = t / dur
+            val freq = 900.0 * exp(ln(150.0 / 900.0) * frac)
+            phase += freq / SR
+            square(phase) * (1.0 - frac).pow(0.4)
+        }
+        return toWav(normalize(raw, 0.65f))
+    }
+
+    private fun genBang(dur: Float, cutHz: Float, vol: Float): ByteArray {
+        val n = (SR * dur).toInt()
         val rng = java.util.Random(42L)
-        val pcm = ShortArray(samples) { i ->
-            val t = i.toDouble() / SAMPLE_RATE
-            val env = (1.0 - t / duration).coerceAtLeast(0.0)
-            val tone  = sin(2.0 * PI * 520.0 * t) * 0.6
-            val noise = rng.nextGaussian() * 0.3
-            ((tone + noise) * env * Short.MAX_VALUE * 0.55)
-                .toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
+        val noise = DoubleArray(n) { i ->
+            val t = i.toDouble() / SR
+            rng.nextGaussian() * exp(-t / (dur * 0.38)) * vol.toDouble()
         }
-        return toWav(pcm)
+        return toWav(normalize(lowPass(noise, cutHz), vol))
     }
 
-    private fun generateNoise(duration: Float, volume: Float): ByteArray {
-        val samples = (SAMPLE_RATE * duration).toInt()
-        val rng = java.util.Random(99L)
-        val pcm = ShortArray(samples) { i ->
-            val t = i.toDouble() / SAMPLE_RATE
-            val env = (1.0 - t / duration).coerceAtLeast(0.0)
-            (rng.nextGaussian() * env * Short.MAX_VALUE * volume)
-                .toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
+    private fun genShipDeath(): ByteArray {
+        val dur = 0.7f;  val n = (SR * dur).toInt()
+        val rng = java.util.Random(13L)
+        var phase = 0.0
+        val raw = DoubleArray(n) { i ->
+            val t = i.toDouble() / SR
+            val frac = t / dur
+            val env = exp(-t / (dur * 0.5))
+            val freq = 280.0 * exp(-frac * 3.5)
+            phase += freq / SR
+            (sawtooth(phase) * 0.55 + rng.nextGaussian() * 0.45) * env
         }
-        return toWav(pcm)
+        return toWav(normalize(lowPass(raw, 320f), 0.9f))
     }
+
+    private fun genThrust(): ByteArray {
+        val dur = 0.45f;  val n = (SR * dur).toInt()
+        val rng = java.util.Random(55L)
+        var phase = 0.0
+        val raw = DoubleArray(n) { i ->
+            phase += 55.0 / SR
+            sawtooth(phase) * 0.65 + rng.nextGaussian() * 0.28
+        }
+        // Crossfade ends for seamless loop
+        val fade = 512
+        for (i in 0 until fade) {
+            val a = i.toDouble() / fade
+            val merged = raw[i] * a + raw[n - fade + i] * (1.0 - a)
+            raw[i] = merged; raw[n - fade + i] = merged
+        }
+        return toWav(normalize(lowPass(raw, 220f), 0.62f))
+    }
+
+    private fun genSaucerWarble(): ByteArray {
+        val dur = 0.5f;  val n = (SR * dur).toInt()
+        var carrier = 0.0;  var modulator = 0.0
+        val raw = DoubleArray(n) { i ->
+            modulator += 8.0 / SR
+            val freq = 320.0 + sin(2.0 * PI * modulator) * 85.0
+            carrier += freq / SR
+            square(carrier) * 0.7
+        }
+        // Crossfade for loop
+        val fade = 256
+        for (i in 0 until fade) {
+            val a = i.toDouble() / fade
+            val m = raw[i] * a + raw[n - fade + i] * (1.0 - a)
+            raw[i] = m; raw[n - fade + i] = m
+        }
+        return toWav(normalize(lowPass(raw, 900f), 0.55f))
+    }
+
+    private fun genSaucerFire(): ByteArray {
+        val dur = 0.06f;  val n = (SR * dur).toInt()
+        var phase = 0.0
+        val raw = DoubleArray(n) { i ->
+            val t = i.toDouble() / SR
+            val frac = t / dur
+            val freq = 1400.0 * exp(ln(220.0 / 1400.0) * frac)
+            phase += freq / SR
+            square(phase) * (1.0 - frac).pow(0.25)
+        }
+        return toWav(normalize(raw, 0.62f))
+    }
+
+    // ── WAV writer ────────────────────────────────────────────────────────────
 
     private fun toWav(pcm: ShortArray): ByteArray {
-        val dataSize = pcm.size * 2
-        val buf = ByteBuffer.allocate(44 + dataSize).order(ByteOrder.LITTLE_ENDIAN)
-        buf.put("RIFF".toByteArray(Charsets.US_ASCII))
-        buf.putInt(36 + dataSize)
+        val data = pcm.size * 2
+        val buf = ByteBuffer.allocate(44 + data).order(ByteOrder.LITTLE_ENDIAN)
+        buf.put("RIFF".toByteArray(Charsets.US_ASCII)); buf.putInt(36 + data)
         buf.put("WAVE".toByteArray(Charsets.US_ASCII))
-        buf.put("fmt ".toByteArray(Charsets.US_ASCII))
-        buf.putInt(16)
-        buf.putShort(1)                         // PCM
-        buf.putShort(1)                         // mono
-        buf.putInt(SAMPLE_RATE)
-        buf.putInt(SAMPLE_RATE * 2)             // byte rate
-        buf.putShort(2)                         // block align
-        buf.putShort(16)                        // bits per sample
-        buf.put("data".toByteArray(Charsets.US_ASCII))
-        buf.putInt(dataSize)
+        buf.put("fmt ".toByteArray(Charsets.US_ASCII)); buf.putInt(16)
+        buf.putShort(1); buf.putShort(1); buf.putInt(SR)
+        buf.putInt(SR * 2); buf.putShort(2); buf.putShort(16)
+        buf.put("data".toByteArray(Charsets.US_ASCII)); buf.putInt(data)
         for (s in pcm) buf.putShort(s)
         return buf.array()
     }
 
-    private fun loadSound(wavBytes: ByteArray): Sound {
-        val tmp = File.createTempFile("ast_", ".wav").also { it.deleteOnExit() }
-        tmp.writeBytes(wavBytes)
-        return Gdx.audio.newSound(Gdx.files.absolute(tmp.absolutePath))
+    private fun loadSound(bytes: ByteArray): Sound {
+        val f = File.createTempFile("ast_", ".wav").also { it.deleteOnExit() }
+        f.writeBytes(bytes)
+        return Gdx.audio.newSound(Gdx.files.absolute(f.absolutePath))
     }
 
-    fun update(delta: Float, asteroidCount: Int) {
+    // ── public API ────────────────────────────────────────────────────────────
+
+    fun update(delta: Float, asteroidCount: Int, thrusting: Boolean, hasSaucer: Boolean) {
         if (!Settings.sfxEnabled) return
+
+        // Heartbeat
         beatInterval = (0.85f - asteroidCount.coerceAtMost(12) * 0.055f).coerceAtLeast(0.22f)
         beatTimer += delta
         if (beatTimer >= beatInterval) {
             beatTimer -= beatInterval
-            if (nextBeat == 0) beat1.play(0.75f) else beat2.play(0.75f)
+            if (nextBeat == 0) beat1.play(0.8f) else beat2.play(0.8f)
             nextBeat = 1 - nextBeat
+        }
+
+        // Thrust loop
+        if (thrusting && !thrustPlaying) {
+            thrustId = thrust.loop(0.72f); thrustPlaying = true
+        } else if (!thrusting && thrustPlaying) {
+            thrust.stop(thrustId); thrustPlaying = false
+        }
+
+        // Saucer warp loop
+        if (hasSaucer && !saucerPlaying) {
+            saucerWarpId = saucerWarp.loop(0.5f); saucerPlaying = true
+        } else if (!hasSaucer && saucerPlaying) {
+            saucerWarp.stop(saucerWarpId); saucerPlaying = false
         }
     }
 
-    fun playFire()      { if (Settings.sfxEnabled) fire.play(0.5f) }
-    fun playBangLarge() { if (Settings.sfxEnabled) bangLarge.play(0.8f) }
-    fun playBangMedium(){ if (Settings.sfxEnabled) bangMedium.play(0.7f) }
-    fun playBangSmall() { if (Settings.sfxEnabled) bangSmall.play(0.6f) }
-    fun playShipBang()  { if (Settings.sfxEnabled) bangShip.play(0.9f) }
+    fun playFire()       { if (Settings.sfxEnabled) fire.play(0.6f) }
+    fun playBangLarge()  { if (Settings.sfxEnabled) bangLarge.play(0.85f) }
+    fun playBangMedium() { if (Settings.sfxEnabled) bangMedium.play(0.75f) }
+    fun playBangSmall()  { if (Settings.sfxEnabled) bangSmall.play(0.65f) }
+    fun playShipBang()   { if (Settings.sfxEnabled) bangShip.play(0.92f) }
+    fun playSaucerFire() { if (Settings.sfxEnabled) saucerFire.play(0.58f) }
 
     fun dispose() {
-        fire.dispose(); bangLarge.dispose(); bangMedium.dispose()
-        bangSmall.dispose(); bangShip.dispose(); beat1.dispose(); beat2.dispose()
+        thrust.stop(); saucerWarp.stop()
+        listOf(fire, bangLarge, bangMedium, bangSmall, bangShip,
+               beat1, beat2, saucerFire, thrust, saucerWarp).forEach { it.dispose() }
     }
 }

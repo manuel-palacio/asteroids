@@ -11,6 +11,7 @@ class InputHandler(private val gameInput: GameInput) {
         gameInput.rotateRight = Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D)
         gameInput.thrust      = Gdx.input.isKeyPressed(Keys.UP)    || Gdx.input.isKeyPressed(Keys.W)
         gameInput.fire        = Gdx.input.isKeyPressed(Keys.SPACE)
+        gameInput.hyperspace  = Gdx.input.isKeyJustPressed(Keys.Z) || Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT)
         touch.poll(gameInput)
     }
 }
