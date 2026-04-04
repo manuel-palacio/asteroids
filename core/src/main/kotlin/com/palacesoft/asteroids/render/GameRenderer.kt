@@ -27,7 +27,7 @@ class GameRenderer(
         shipRenderer.update(delta)
     }
 
-    fun render(world: World, shakeOffX: Float = 0f, shakeOffY: Float = 0f) {
+    fun render(world: World, delta: Float, shakeOffX: Float = 0f, shakeOffY: Float = 0f) {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
@@ -63,7 +63,7 @@ class GameRenderer(
 
         // Pass 5: Particle overlays (additive, SpriteBatch world space)
         batch.projectionMatrix = camera.combined
-        vfx?.renderParticleOverlays(batch, 0f)
+        vfx?.renderParticleOverlays(batch, delta)
 
         // Score popups — always crisp, never bloomed
         batch.projectionMatrix = camera.combined
