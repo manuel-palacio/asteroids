@@ -1,8 +1,8 @@
-package com.asteroids.desktop
+package com.palacesoft.asteroids.desktop
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
-import com.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.AsteroidsGame
 
 object DesktopLauncher {
     @JvmStatic

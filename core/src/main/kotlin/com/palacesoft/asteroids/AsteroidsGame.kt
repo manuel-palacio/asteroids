@@ -1,4 +1,4 @@
-package com.asteroids
+package com.palacesoft.asteroids
 
 import com.badlogic.gdx.Game
 

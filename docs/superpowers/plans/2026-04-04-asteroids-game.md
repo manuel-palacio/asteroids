@@ -161,11 +161,11 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.asteroids.desktop.DesktopLauncher")
+    mainClass.set("com.palacesoft.asteroids.desktop.DesktopLauncher")
 }
 
 tasks.jar {
-    manifest { attributes["Main-Class"] = "com.asteroids.desktop.DesktopLauncher" }
+    manifest { attributes["Main-Class"] = "com.palacesoft.asteroids.desktop.DesktopLauncher" }
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
@@ -184,9 +184,9 @@ val natives: Configuration by configurations.creating
 
 android {
     compileSdk = 34
-    namespace = "com.asteroids"
+    namespace = "com.palacesoft.asteroids"
     defaultConfig {
-        applicationId = "com.asteroids"
+        applicationId = "com.palacesoft.asteroids"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -254,12 +254,12 @@ tasks.named("preBuild") { dependsOn("copyAndroidNatives") }
 - [ ] **Step 8: Create `android/src/main/kotlin/com/asteroids/android/AndroidLauncher.kt`**
 
 ```kotlin
-package com.asteroids.android
+package com.palacesoft.asteroids.android
 
 import android.os.Bundle
 import com.badlogic.gdx.backends.android.AndroidApplication
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
-import com.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.AsteroidsGame
 
 class AndroidLauncher : AndroidApplication() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -275,11 +275,11 @@ class AndroidLauncher : AndroidApplication() {
 - [ ] **Step 9: Create `desktop/src/main/kotlin/com/asteroids/desktop/DesktopLauncher.kt`**
 
 ```kotlin
-package com.asteroids.desktop
+package com.palacesoft.asteroids.desktop
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
-import com.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.AsteroidsGame
 
 object DesktopLauncher {
     @JvmStatic
@@ -298,7 +298,7 @@ object DesktopLauncher {
 - [ ] **Step 10: Create stub `AsteroidsGame.kt` so it compiles**
 
 ```kotlin
-package com.asteroids
+package com.palacesoft.asteroids
 
 import com.badlogic.gdx.Game
 
@@ -336,7 +336,7 @@ git commit -m "feat: add Gradle scaffold for core/desktop/android modules"
 Create `core/src/test/kotlin/com/asteroids/util/WorldMathTest.kt`:
 
 ```kotlin
-package com.asteroids.util
+package com.palacesoft.asteroids.util
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -365,7 +365,7 @@ class WorldMathTest {
 - [ ] **Step 2: Run to verify failure**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.util.WorldMathTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.util.WorldMathTest"
 ```
 
 Expected: FAIL — `wrapCoord` not found.
@@ -373,7 +373,7 @@ Expected: FAIL — `wrapCoord` not found.
 - [ ] **Step 3: Create `core/src/main/kotlin/com/asteroids/util/Settings.kt`**
 
 ```kotlin
-package com.asteroids.util
+package com.palacesoft.asteroids.util
 
 object Settings {
     const val WORLD_WIDTH  = 1600f
@@ -386,7 +386,7 @@ object Settings {
 - [ ] **Step 4: Create `core/src/main/kotlin/com/asteroids/util/WorldMath.kt`**
 
 ```kotlin
-package com.asteroids.util
+package com.palacesoft.asteroids.util
 
 fun wrapCoord(value: Float, min: Float, max: Float): Float {
     val range = max - min
@@ -411,7 +411,7 @@ fun circlesOverlap(
 - [ ] **Step 5: Run tests to verify they pass**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.util.WorldMathTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.util.WorldMathTest"
 ```
 
 Expected: PASS — 6 tests.
@@ -437,7 +437,7 @@ git commit -m "feat: add Settings constants and WorldMath utilities"
 - [ ] **Step 1: Write failing AsteroidFactory tests**
 
 ```kotlin
-package com.asteroids.game.entity
+package com.palacesoft.asteroids.game.entity
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -473,7 +473,7 @@ class AsteroidFactoryTest {
 - [ ] **Step 2: Run to confirm failure**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.entity.AsteroidFactoryTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.entity.AsteroidFactoryTest"
 ```
 
 Expected: FAIL — `AsteroidSize` not found.
@@ -481,9 +481,9 @@ Expected: FAIL — `AsteroidSize` not found.
 - [ ] **Step 3: Create `Ship.kt`**
 
 ```kotlin
-package com.asteroids.game.entity
+package com.palacesoft.asteroids.game.entity
 
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.util.Settings
 
 class Ship {
     var x = Settings.WORLD_WIDTH / 2f
@@ -514,7 +514,7 @@ class Ship {
 - [ ] **Step 4: Create `Asteroid.kt`**
 
 ```kotlin
-package com.asteroids.game.entity
+package com.palacesoft.asteroids.game.entity
 
 import kotlin.math.*
 import kotlin.random.Random
@@ -578,9 +578,9 @@ object AsteroidFactory {
 - [ ] **Step 5: Create `Bullet.kt`**
 
 ```kotlin
-package com.asteroids.game.entity
+package com.palacesoft.asteroids.game.entity
 
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.util.Settings
 
 class Bullet {
     var x = 0f; var y = 0f
@@ -600,7 +600,7 @@ class Bullet {
 - [ ] **Step 6: Create `Saucer.kt`**
 
 ```kotlin
-package com.asteroids.game.entity
+package com.palacesoft.asteroids.game.entity
 
 enum class SaucerSize { LARGE, SMALL }
 
@@ -621,7 +621,7 @@ class Saucer(val size: SaucerSize) {
 - [ ] **Step 7: Run tests**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.entity.AsteroidFactoryTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.entity.AsteroidFactoryTest"
 ```
 
 Expected: PASS — 4 tests.
@@ -644,10 +644,10 @@ git commit -m "feat: add game entity classes and AsteroidFactory"
 - [ ] **Step 1: Write failing tests**
 
 ```kotlin
-package com.asteroids.game.system
+package com.palacesoft.asteroids.game.system
 
-import com.asteroids.game.entity.Bullet
-import com.asteroids.game.entity.Ship
+import com.palacesoft.asteroids.game.entity.Bullet
+import com.palacesoft.asteroids.game.entity.Ship
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -682,7 +682,7 @@ class BulletPoolTest {
 - [ ] **Step 2: Run to confirm failure**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.system.BulletPoolTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.system.BulletPoolTest"
 ```
 
 Expected: FAIL — `BulletPool` not found.
@@ -690,10 +690,10 @@ Expected: FAIL — `BulletPool` not found.
 - [ ] **Step 3: Create `BulletPool.kt`**
 
 ```kotlin
-package com.asteroids.game.system
+package com.palacesoft.asteroids.game.system
 
-import com.asteroids.game.entity.Bullet
-import com.asteroids.game.entity.Ship
+import com.palacesoft.asteroids.game.entity.Bullet
+import com.palacesoft.asteroids.game.entity.Ship
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -717,7 +717,7 @@ class BulletPool {
         if (!bullets.contains(bullet)) bullets.add(bullet)
     }
 
-    fun acquireForSaucer(saucer: com.asteroids.game.entity.Saucer,
+    fun acquireForSaucer(saucer: com.palacesoft.asteroids.game.entity.Saucer,
                          targetX: Float, targetY: Float,
                          bullets: MutableList<Bullet>,
                          spreadDeg: Float = 0f) {
@@ -740,7 +740,7 @@ class BulletPool {
 - [ ] **Step 4: Run tests**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.system.BulletPoolTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.system.BulletPoolTest"
 ```
 
 Expected: PASS — 3 tests.
@@ -763,10 +763,10 @@ git commit -m "feat: add BulletPool with 4-bullet cap and recycling"
 - [ ] **Step 1: Write failing tests**
 
 ```kotlin
-package com.asteroids.game.system
+package com.palacesoft.asteroids.game.system
 
-import com.asteroids.game.entity.*
-import com.asteroids.game.World
+import com.palacesoft.asteroids.game.entity.*
+import com.palacesoft.asteroids.game.World
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -811,7 +811,7 @@ class CollisionSystemTest {
 - [ ] **Step 2: Run to confirm failure**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.system.CollisionSystemTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.system.CollisionSystemTest"
 ```
 
 Expected: FAIL — `World` not found.
@@ -819,13 +819,13 @@ Expected: FAIL — `World` not found.
 - [ ] **Step 3: Create a minimal `World.kt` stub (will be expanded in Task 7)**
 
 ```kotlin
-package com.asteroids.game
+package com.palacesoft.asteroids.game
 
-import com.asteroids.game.entity.*
-import com.asteroids.game.system.BulletPool
-import com.asteroids.game.system.CollisionSystem
-import com.asteroids.game.system.WaveSystem
-import com.asteroids.input.GameInput
+import com.palacesoft.asteroids.game.entity.*
+import com.palacesoft.asteroids.game.system.BulletPool
+import com.palacesoft.asteroids.game.system.CollisionSystem
+import com.palacesoft.asteroids.game.system.WaveSystem
+import com.palacesoft.asteroids.input.GameInput
 
 class World {
     val ship = Ship()
@@ -847,7 +847,7 @@ class World {
 - [ ] **Step 4: Create `GameInput.kt` stub (needed by World)**
 
 ```kotlin
-package com.asteroids.input
+package com.palacesoft.asteroids.input
 
 data class GameInput(
     var rotateLeft: Boolean  = false,
@@ -861,9 +861,9 @@ data class GameInput(
 - [ ] **Step 5: Create a minimal `WaveSystem.kt` stub**
 
 ```kotlin
-package com.asteroids.game.system
+package com.palacesoft.asteroids.game.system
 
-import com.asteroids.game.World
+import com.palacesoft.asteroids.game.World
 
 class WaveSystem(private val world: World) {
     fun update(delta: Float) {}
@@ -874,11 +874,11 @@ class WaveSystem(private val world: World) {
 - [ ] **Step 6: Create `CollisionSystem.kt`**
 
 ```kotlin
-package com.asteroids.game.system
+package com.palacesoft.asteroids.game.system
 
-import com.asteroids.game.World
-import com.asteroids.game.entity.AsteroidFactory
-import com.asteroids.util.circlesOverlap
+import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.game.entity.AsteroidFactory
+import com.palacesoft.asteroids.util.circlesOverlap
 
 class CollisionSystem(private val world: World) {
 
@@ -967,7 +967,7 @@ class CollisionSystem(private val world: World) {
 - [ ] **Step 7: Run collision tests**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.system.CollisionSystemTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.system.CollisionSystemTest"
 ```
 
 Expected: PASS — 3 tests.
@@ -990,9 +990,9 @@ git commit -m "feat: add CollisionSystem with bullet/asteroid/ship/saucer checks
 - [ ] **Step 1: Write failing tests**
 
 ```kotlin
-package com.asteroids.game.system
+package com.palacesoft.asteroids.game.system
 
-import com.asteroids.game.World
+import com.palacesoft.asteroids.game.World
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -1022,7 +1022,7 @@ class WaveSystemTest {
 - [ ] **Step 2: Run to confirm failure**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.system.WaveSystemTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.system.WaveSystemTest"
 ```
 
 Expected: FAIL — `spawnWave` not found.
@@ -1030,12 +1030,12 @@ Expected: FAIL — `spawnWave` not found.
 - [ ] **Step 3: Replace WaveSystem with full implementation**
 
 ```kotlin
-package com.asteroids.game.system
+package com.palacesoft.asteroids.game.system
 
-import com.asteroids.game.World
-import com.asteroids.game.entity.AsteroidFactory
-import com.asteroids.game.entity.AsteroidSize
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.game.entity.AsteroidFactory
+import com.palacesoft.asteroids.game.entity.AsteroidSize
+import com.palacesoft.asteroids.util.Settings
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
@@ -1095,7 +1095,7 @@ class WaveSystem(private val world: World) {
         val fromLeft = Random.nextBoolean()
         saucer.x = if (fromLeft) 0f else Settings.WORLD_WIDTH
         saucer.y = Random.nextFloat() * Settings.WORLD_HEIGHT
-        saucer.velX = (if (fromLeft) 1f else -1f) * com.asteroids.game.entity.Saucer.SPEED
+        saucer.velX = (if (fromLeft) 1f else -1f) * com.palacesoft.asteroids.game.entity.Saucer.SPEED
         saucer.velY = 0f
         saucer.alive = true
         saucer.shootTimer = 0f
@@ -1111,9 +1111,9 @@ class WaveSystem(private val world: World) {
 
             // Shoot
             saucer.shootTimer += delta
-            if (saucer.shootTimer >= com.asteroids.game.entity.Saucer.SHOOT_INTERVAL) {
+            if (saucer.shootTimer >= com.palacesoft.asteroids.game.entity.Saucer.SHOOT_INTERVAL) {
                 saucer.shootTimer = 0f
-                val spread = if (saucer.size == com.asteroids.game.entity.SaucerSize.LARGE) 360f else 15f
+                val spread = if (saucer.size == com.palacesoft.asteroids.game.entity.SaucerSize.LARGE) 360f else 15f
                 world.bulletPool.acquireForSaucer(saucer, world.ship.x, world.ship.y,
                                                   world.bullets, spread)
             }
@@ -1136,8 +1136,8 @@ class WaveSystem(private val world: World) {
         spawnWave()
         world.ship.reset()
         // Pre-allocate 2 saucers
-        repeat(2) { world.saucers.add(com.asteroids.game.entity.Saucer(
-            com.asteroids.game.entity.SaucerSize.LARGE)) }
+        repeat(2) { world.saucers.add(com.palacesoft.asteroids.game.entity.Saucer(
+            com.palacesoft.asteroids.game.entity.SaucerSize.LARGE)) }
         saucerTimer = 0f
         betweenWaveTimer = 0f
     }
@@ -1147,7 +1147,7 @@ class WaveSystem(private val world: World) {
 - [ ] **Step 4: Run tests**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.game.system.WaveSystemTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.game.system.WaveSystemTest"
 ```
 
 Expected: PASS — 3 tests.
@@ -1177,15 +1177,15 @@ git commit -m "feat: add WaveSystem with wave progression and saucer spawning"
 - [ ] **Step 1: Replace World stub with full implementation**
 
 ```kotlin
-package com.asteroids.game
+package com.palacesoft.asteroids.game
 
-import com.asteroids.game.entity.*
-import com.asteroids.game.system.BulletPool
-import com.asteroids.game.system.CollisionSystem
-import com.asteroids.game.system.WaveSystem
-import com.asteroids.input.GameInput
-import com.asteroids.util.Settings
-import com.asteroids.util.wrapCoord
+import com.palacesoft.asteroids.game.entity.*
+import com.palacesoft.asteroids.game.system.BulletPool
+import com.palacesoft.asteroids.game.system.CollisionSystem
+import com.palacesoft.asteroids.game.system.WaveSystem
+import com.palacesoft.asteroids.input.GameInput
+import com.palacesoft.asteroids.util.Settings
+import com.palacesoft.asteroids.util.wrapCoord
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -1317,7 +1317,7 @@ git commit -m "feat: add full World update loop with ship physics and bullet mov
 - [ ] **Step 1: Create `InputHandler.kt`**
 
 ```kotlin
-package com.asteroids.input
+package com.palacesoft.asteroids.input
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
@@ -1341,10 +1341,10 @@ class InputHandler(private val gameInput: GameInput) {
 - [ ] **Step 2: Create `TouchControls.kt`**
 
 ```kotlin
-package com.asteroids.input
+package com.palacesoft.asteroids.input
 
 import com.badlogic.gdx.Gdx
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.util.Settings
 
 class TouchControls(private val gameInput: GameInput) {
     // Left half = rotate; right lower = fire; right upper = hyperspace
@@ -1439,11 +1439,11 @@ git commit -m "feat: add InputHandler and TouchControls for keyboard and virtual
 - [ ] **Step 1: Create `Starfield.kt`**
 
 ```kotlin
-package com.asteroids.render
+package com.palacesoft.asteroids.render
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.Color
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.util.Settings
 import kotlin.random.Random
 
 class Starfield {
@@ -1491,11 +1491,11 @@ class Starfield {
 - [ ] **Step 2: Create `ShipRenderer.kt`**
 
 ```kotlin
-package com.asteroids.render
+package com.palacesoft.asteroids.render
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.asteroids.game.entity.Ship
+import com.palacesoft.asteroids.game.entity.Ship
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -1541,11 +1541,11 @@ class ShipRenderer {
 - [ ] **Step 3: Create `AsteroidRenderer.kt`**
 
 ```kotlin
-package com.asteroids.render
+package com.palacesoft.asteroids.render
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.asteroids.game.entity.Asteroid
+import com.palacesoft.asteroids.game.entity.Asteroid
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -1579,11 +1579,11 @@ class AsteroidRenderer {
 - [ ] **Step 4: Create `SaucerRenderer.kt`**
 
 ```kotlin
-package com.asteroids.render
+package com.palacesoft.asteroids.render
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.asteroids.game.entity.Saucer
+import com.palacesoft.asteroids.game.entity.Saucer
 
 class SaucerRenderer {
     private val COLOR = Color(1f, 0.2f, 1f, 1f)  // magenta
@@ -1610,16 +1610,16 @@ class SaucerRenderer {
 - [ ] **Step 5: Create `GameRenderer.kt`**
 
 ```kotlin
-package com.asteroids.render
+package com.palacesoft.asteroids.render
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.asteroids.game.World
-import com.asteroids.vfx.BloomPass
-import com.asteroids.vfx.VfxManager
+import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.vfx.BloomPass
+import com.palacesoft.asteroids.vfx.VfxManager
 
 class GameRenderer(
     private val camera: OrthographicCamera,
@@ -1646,8 +1646,8 @@ class GameRenderer(
 
         // Camera with shake
         camera.position.set(
-            com.asteroids.util.Settings.WORLD_WIDTH / 2f + shakeOffX,
-            com.asteroids.util.Settings.WORLD_HEIGHT / 2f + shakeOffY, 0f)
+            com.palacesoft.asteroids.util.Settings.WORLD_WIDTH / 2f + shakeOffX,
+            com.palacesoft.asteroids.util.Settings.WORLD_HEIGHT / 2f + shakeOffY, 0f)
         camera.update()
         sr.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
@@ -1687,8 +1687,8 @@ class GameRenderer(
 
         // Pass 4: HUD (no shake)
         camera.position.set(
-            com.asteroids.util.Settings.WORLD_WIDTH / 2f,
-            com.asteroids.util.Settings.WORLD_HEIGHT / 2f, 0f)
+            com.palacesoft.asteroids.util.Settings.WORLD_WIDTH / 2f,
+            com.palacesoft.asteroids.util.Settings.WORLD_HEIGHT / 2f, 0f)
         camera.update()
         hudRenderer?.render(world)
     }
@@ -1698,14 +1698,14 @@ class GameRenderer(
 - [ ] **Step 6: Replace `AsteroidsGame.kt` with full version**
 
 ```kotlin
-package com.asteroids
+package com.palacesoft.asteroids
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.asteroids.screen.MenuScreen
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.screen.MenuScreen
+import com.palacesoft.asteroids.util.Settings
 
 class AsteroidsGame : Game() {
     lateinit var batch: SpriteBatch
@@ -1757,12 +1757,12 @@ git commit -m "feat: add Starfield, geometry renderers, and GameRenderer pipelin
 - [ ] **Step 1: Create `HudRenderer.kt` stub (full version in Task 15)**
 
 ```kotlin
-package com.asteroids.render
+package com.palacesoft.asteroids.render
 
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.asteroids.game.World
+import com.palacesoft.asteroids.game.World
 
 class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
     private val font = BitmapFont()  // placeholder — replace with arcade font in Task 15
@@ -1778,16 +1778,16 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
 - [ ] **Step 2: Create `GameScreen.kt`**
 
 ```kotlin
-package com.asteroids.screen
+package com.palacesoft.asteroids.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
-import com.asteroids.AsteroidsGame
-import com.asteroids.game.World
-import com.asteroids.input.InputHandler
-import com.asteroids.render.GameRenderer
-import com.asteroids.render.HudRenderer
-import com.asteroids.vfx.ScreenShake
+import com.palacesoft.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.input.InputHandler
+import com.palacesoft.asteroids.render.GameRenderer
+import com.palacesoft.asteroids.render.HudRenderer
+import com.palacesoft.asteroids.vfx.ScreenShake
 
 class GameScreen(private val game: AsteroidsGame) : Screen {
     private val world        = World()
@@ -1824,13 +1824,13 @@ class GameScreen(private val game: AsteroidsGame) : Screen {
 - [ ] **Step 3: Create `MenuScreen.kt` stub**
 
 ```kotlin
-package com.asteroids.screen
+package com.palacesoft.asteroids.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.AsteroidsGame
 
 class MenuScreen(private val game: AsteroidsGame) : Screen {
     private val font = BitmapFont()
@@ -1860,13 +1860,13 @@ class MenuScreen(private val game: AsteroidsGame) : Screen {
 - [ ] **Step 4: Create `GameOverScreen.kt` stub**
 
 ```kotlin
-package com.asteroids.screen
+package com.palacesoft.asteroids.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.AsteroidsGame
 
 class GameOverScreen(private val game: AsteroidsGame, private val score: Int) : Screen {
     private val font = BitmapFont()
@@ -1897,7 +1897,7 @@ class GameOverScreen(private val game: AsteroidsGame, private val score: Int) : 
 - [ ] **Step 5: Create `ScreenShake.kt` stub (full version in Task 11)**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
 class ScreenShake {
     var offsetX = 0f; var offsetY = 0f
@@ -1936,7 +1936,7 @@ git commit -m "feat: first playable build — GameScreen wiring up world, input,
 - [ ] **Step 1: Write failing tests**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -1967,7 +1967,7 @@ class ScreenShakeTest {
 - [ ] **Step 2: Run to confirm first two pass, third fails**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.vfx.ScreenShakeTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.vfx.ScreenShakeTest"
 ```
 
 Expected: "no shake when trauma is zero" FAILS — current impl always produces noise.
@@ -1975,7 +1975,7 @@ Expected: "no shake when trauma is zero" FAILS — current impl always produces 
 - [ ] **Step 3: Replace `ScreenShake.kt` with full implementation**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
 import kotlin.math.sin
 
@@ -2007,7 +2007,7 @@ class ScreenShake {
 - [ ] **Step 4: Run tests**
 
 ```bash
-./gradlew :core:test --tests "com.asteroids.vfx.ScreenShakeTest"
+./gradlew :core:test --tests "com.palacesoft.asteroids.vfx.ScreenShakeTest"
 ```
 
 Expected: PASS — 3 tests.
@@ -2030,7 +2030,7 @@ git commit -m "feat: full ScreenShake implementation with trauma-squared decay"
 - [ ] **Step 1: Create `ParticlePool.kt`**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -2103,9 +2103,9 @@ class ParticlePool(capacity: Int = 400) {
 - [ ] **Step 2: Create `ThrustTrail.kt`**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
-import com.asteroids.game.entity.Ship
+import com.palacesoft.asteroids.game.entity.Ship
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
@@ -2168,9 +2168,9 @@ git commit -m "feat: add ParticlePool (400 pre-allocated) and ThrustTrail emitte
 - [ ] **Step 1: Create `Explosion.kt`**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
-import com.asteroids.game.entity.AsteroidSize
+import com.palacesoft.asteroids.game.entity.AsteroidSize
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
@@ -2227,11 +2227,11 @@ class Explosion(private val pool: ParticlePool) {
 - [ ] **Step 2: Create `VfxManager.kt`**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.asteroids.game.entity.AsteroidSize
+import com.palacesoft.asteroids.game.entity.AsteroidSize
 
 class VfxManager(private val sr: ShapeRenderer, camera: OrthographicCamera) {
     val pool        = ParticlePool(400)
@@ -2250,7 +2250,7 @@ class VfxManager(private val sr: ShapeRenderer, camera: OrthographicCamera) {
         shake.trigger(0.8f)
     }
 
-    fun updateThrust(delta: Float, ship: com.asteroids.game.entity.Ship) {
+    fun updateThrust(delta: Float, ship: com.palacesoft.asteroids.game.entity.Ship) {
         thrust.update(delta, ship)
     }
 
@@ -2279,13 +2279,13 @@ Find in `checkBulletsVsAsteroids()`:
 Replace with:
 
 ```kotlin
-(world.vfx as? com.asteroids.vfx.VfxManager)?.spawnExplosion(ast.x, ast.y, ast.size)
+(world.vfx as? com.palacesoft.asteroids.vfx.VfxManager)?.spawnExplosion(ast.x, ast.y, ast.size)
 ```
 
 Also add to `checkShipVsAsteroids()` after `world.ship.alive = false`:
 
 ```kotlin
-(world.vfx as? com.asteroids.vfx.VfxManager)?.spawnShipExplosion(world.ship.x, world.ship.y)
+(world.vfx as? com.palacesoft.asteroids.vfx.VfxManager)?.spawnShipExplosion(world.ship.x, world.ship.y)
 ```
 
 - [ ] **Step 4: Update `GameScreen.kt` — wire VfxManager**
@@ -2433,7 +2433,7 @@ void main() {
 - [ ] **Step 4: Create `BloomPass.kt`**
 
 ```kotlin
-package com.asteroids.vfx
+package com.palacesoft.asteroids.vfx
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
@@ -2442,7 +2442,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.Disposable
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.util.Settings
 
 class BloomPass(private val batch: SpriteBatch) : Disposable {
     private val w = (Gdx.graphics.width  / 2).coerceAtLeast(1)
@@ -2557,7 +2557,7 @@ git commit -m "feat: add FBO bloom pass with 9-tap separable Gaussian blur"
 - [ ] **Step 1: Replace HudRenderer stub with Scene2D implementation**
 
 ```kotlin
-package com.asteroids.render
+package com.palacesoft.asteroids.render
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -2568,8 +2568,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
-import com.asteroids.game.World
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.util.Settings
 
 class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
     // Use FitViewport so HUD scales to screen
@@ -2690,16 +2690,16 @@ git commit -m "feat: add Scene2D HUD with score, lives, wave banner, and score p
 - [ ] **Step 1: Replace `MenuScreen.kt` with polished version**
 
 ```kotlin
-package com.asteroids.screen
+package com.palacesoft.asteroids.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.utils.Align
-import com.asteroids.AsteroidsGame
-import com.asteroids.render.Starfield
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.render.Starfield
+import com.palacesoft.asteroids.util.Settings
 
 class MenuScreen(private val game: AsteroidsGame) : Screen {
     private val starfield = Starfield()
@@ -2741,15 +2741,15 @@ class MenuScreen(private val game: AsteroidsGame) : Screen {
 - [ ] **Step 2: Replace `GameOverScreen.kt` with polished version**
 
 ```kotlin
-package com.asteroids.screen
+package com.palacesoft.asteroids.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.asteroids.AsteroidsGame
-import com.asteroids.render.Starfield
-import com.asteroids.util.Settings
+import com.palacesoft.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.render.Starfield
+import com.palacesoft.asteroids.util.Settings
 
 class GameOverScreen(private val game: AsteroidsGame, private val finalScore: Int) : Screen {
     private val starfield = Starfield()
@@ -2837,7 +2837,7 @@ Create `android/proguard-rules.pro` if not present:
 -keep class com.badlogic.** { *; }
 -keep interface com.badlogic.** { *; }
 -keepclassmembers class com.badlogic.** { *; }
--keep class com.asteroids.** { *; }
+-keep class com.palacesoft.asteroids.** { *; }
 ```
 
 - [ ] **Step 4: Final test run**

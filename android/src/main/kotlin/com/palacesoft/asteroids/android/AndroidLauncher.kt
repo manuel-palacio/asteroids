@@ -1,9 +1,9 @@
-package com.asteroids.android
+package com.palacesoft.asteroids.android
 
 import android.os.Bundle
 import com.badlogic.gdx.backends.android.AndroidApplication
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
-import com.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.AsteroidsGame
 
 class AndroidLauncher : AndroidApplication() {
     override fun onCreate(savedInstanceState: Bundle?) {

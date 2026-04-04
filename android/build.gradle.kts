@@ -8,9 +8,9 @@ val natives: Configuration by configurations.creating
 
 android {
     compileSdk = 34
-    namespace = "com.asteroids"
+    namespace = "com.palacesoft.asteroids"
     defaultConfig {
-        applicationId = "com.asteroids"
+        applicationId = "com.palacesoft.asteroids"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

@@ -13,11 +13,11 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.asteroids.desktop.DesktopLauncher")
+    mainClass.set("com.palacesoft.asteroids.desktop.DesktopLauncher")
 }
 
 tasks.jar {
-    manifest { attributes["Main-Class"] = "com.asteroids.desktop.DesktopLauncher" }
+    manifest { attributes["Main-Class"] = "com.palacesoft.asteroids.desktop.DesktopLauncher" }
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
