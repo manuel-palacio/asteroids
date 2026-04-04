@@ -1,0 +1,84 @@
+package com.palacesoft.asteroids.game.system
+
+import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.game.entity.AsteroidFactory
+import com.palacesoft.asteroids.util.circlesOverlap
+import com.palacesoft.asteroids.vfx.VfxManager
+
+class CollisionSystem(private val world: World) {
+
+    fun update() {
+        checkBulletsVsAsteroids()
+        checkBulletsVsSaucers()
+        checkShipVsAsteroids()
+        checkShipVsSaucers()
+        checkShipVsSaucerBullets()
+    }
+
+    private fun checkBulletsVsAsteroids() {
+        for (bullet in world.bullets) {
+            if (!bullet.alive || !bullet.fromPlayer) continue
+            for (ast in world.asteroids) {
+                if (!ast.alive) continue
+                if (circlesOverlap(bullet.x, bullet.y, bullet.radius, ast.x, ast.y, ast.radius)) {
+                    bullet.alive = false
+                    ast.alive = false
+                    world.score += ast.size.score
+                    world.asteroids.addAll(AsteroidFactory.split(ast))
+                    (world.vfx as? VfxManager)?.spawnExplosion(ast.x, ast.y, ast.size)
+                    break
+                }
+            }
+        }
+    }
+
+    private fun checkBulletsVsSaucers() {
+        for (bullet in world.bullets) {
+            if (!bullet.alive || !bullet.fromPlayer) continue
+            for (saucer in world.saucers) {
+                if (!saucer.alive) continue
+                if (circlesOverlap(bullet.x, bullet.y, bullet.radius, saucer.x, saucer.y, saucer.radius)) {
+                    bullet.alive = false
+                    saucer.alive = false
+                    world.score += 1000
+                    break
+                }
+            }
+        }
+    }
+
+    private fun checkShipVsAsteroids() {
+        if (!world.ship.alive || world.ship.invulnerableTimer > 0f) return
+        for (ast in world.asteroids) {
+            if (!ast.alive) continue
+            if (circlesOverlap(world.ship.x, world.ship.y, world.ship.radius, ast.x, ast.y, ast.radius)) {
+                world.ship.alive = false
+                (world.vfx as? VfxManager)?.spawnShipExplosion(world.ship.x, world.ship.y)
+                return
+            }
+        }
+    }
+
+    private fun checkShipVsSaucers() {
+        if (!world.ship.alive || world.ship.invulnerableTimer > 0f) return
+        for (saucer in world.saucers) {
+            if (!saucer.alive) continue
+            if (circlesOverlap(world.ship.x, world.ship.y, world.ship.radius, saucer.x, saucer.y, saucer.radius)) {
+                world.ship.alive = false
+                return
+            }
+        }
+    }
+
+    private fun checkShipVsSaucerBullets() {
+        if (!world.ship.alive || world.ship.invulnerableTimer > 0f) return
+        for (bullet in world.bullets) {
+            if (!bullet.alive || bullet.fromPlayer) continue
+            if (circlesOverlap(world.ship.x, world.ship.y, world.ship.radius, bullet.x, bullet.y, bullet.radius)) {
+                bullet.alive = false
+                world.ship.alive = false
+                return
+            }
+        }
+    }
+}
