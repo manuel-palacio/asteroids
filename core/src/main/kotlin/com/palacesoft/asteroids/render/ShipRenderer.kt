@@ -1,5 +1,6 @@
 package com.palacesoft.asteroids.render
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.palacesoft.asteroids.game.entity.Ship
@@ -24,6 +25,7 @@ class ShipRenderer {
         // Rear notch (small indent at centre-back)
         val bx  = -cos(rad) * r * 0.35f;   val by  = -sin(rad) * r * 0.35f
 
+        Gdx.gl.glLineWidth(2f)
         sr.begin(ShapeRenderer.ShapeType.Line)
         sr.color = WHITE
         // Hull: nose → left wing → notch → right wing → nose
@@ -49,5 +51,6 @@ class ShipRenderer {
             sr.line(ship.x + ex, ship.y + ey, ship.x + rx, ship.y + ry)
         }
         sr.end()
+        Gdx.gl.glLineWidth(1f)
     }
 }

@@ -1,6 +1,8 @@
 package com.palacesoft.asteroids.render
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.palacesoft.asteroids.game.entity.Asteroid
 import kotlin.math.cos
@@ -11,6 +13,7 @@ class AsteroidRenderer {
 
     fun render(sr: ShapeRenderer, asteroids: List<Asteroid>) {
         if (asteroids.none { it.alive }) return
+        Gdx.gl.glLineWidth(2f)
         sr.begin(ShapeRenderer.ShapeType.Line)
         sr.color = COLOR
         for (ast in asteroids) {
@@ -19,7 +22,7 @@ class AsteroidRenderer {
             val cosR = cos(rad); val sinR = sin(rad)
             val verts = ast.shape.size / 2
             for (i in 0 until verts) {
-                val x0 = ast.shape[i * 2];              val y0 = ast.shape[i * 2 + 1]
+                val x0 = ast.shape[i * 2];               val y0 = ast.shape[i * 2 + 1]
                 val x1 = ast.shape[((i+1) % verts) * 2]; val y1 = ast.shape[((i+1) % verts) * 2 + 1]
                 sr.line(
                     cosR * x0 - sinR * y0 + ast.x, sinR * x0 + cosR * y0 + ast.y,
@@ -28,5 +31,6 @@ class AsteroidRenderer {
             }
         }
         sr.end()
+        Gdx.gl.glLineWidth(1f)
     }
 }

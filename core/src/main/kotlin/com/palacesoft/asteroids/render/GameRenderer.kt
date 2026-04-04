@@ -73,15 +73,17 @@ class GameRenderer(
         saucerRend.render(sr, world.saucers)
         if (world.ship.visible) shipRenderer.render(sr, world.ship)
 
+        Gdx.gl.glLineWidth(2f)
         sr.begin(ShapeRenderer.ShapeType.Line)
         sr.color = com.badlogic.gdx.graphics.Color.WHITE
         for (b in world.bullets) {
             if (!b.alive) continue
             val spd = kotlin.math.sqrt(b.velX * b.velX + b.velY * b.velY).takeIf { it > 0f } ?: 1f
-            val dx = b.velX / spd * 7f
-            val dy = b.velY / spd * 7f
+            val dx = b.velX / spd * 9f
+            val dy = b.velY / spd * 9f
             sr.line(b.x - dx, b.y - dy, b.x + dx, b.y + dy)
         }
         sr.end()
+        Gdx.gl.glLineWidth(1f)
     }
 }
