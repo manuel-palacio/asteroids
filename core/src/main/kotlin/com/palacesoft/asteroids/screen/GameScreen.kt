@@ -1,0 +1,43 @@
+package com.palacesoft.asteroids.screen
+
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Screen
+import com.palacesoft.asteroids.AsteroidsGame
+import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.input.InputHandler
+import com.palacesoft.asteroids.render.GameRenderer
+import com.palacesoft.asteroids.render.HudRenderer
+import com.palacesoft.asteroids.vfx.ScreenShake
+
+class GameScreen(private val game: AsteroidsGame) : Screen {
+    private val world        = World()
+    private val inputHandler = InputHandler(world.input)
+    private val shake        = ScreenShake()
+    private val renderer     = GameRenderer(game.camera, game.batch, game.sr)
+
+    init {
+        renderer.hudRenderer = HudRenderer(game.batch, game.camera)
+        world.start()
+        Gdx.input.isCatchBackKey = true
+    }
+
+    override fun render(delta: Float) {
+        val dt = delta.coerceAtMost(0.05f)
+        inputHandler.poll()
+        world.update(dt)
+        shake.update(dt)
+        renderer.update(dt, world)
+        renderer.render(world, shake.offsetX, shake.offsetY)
+        if (world.gameOver) game.setScreen(GameOverScreen(game, world.score))
+    }
+
+    override fun resize(width: Int, height: Int) {
+        renderer.hudRenderer?.resize(width, height)
+    }
+
+    override fun show()   { Gdx.input.isCatchBackKey = true }
+    override fun hide()   {}
+    override fun pause()  {}
+    override fun resume() {}
+    override fun dispose() { renderer.hudRenderer?.dispose() }
+}
