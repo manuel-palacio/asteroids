@@ -33,14 +33,14 @@ class BloomPass(private val batch: SpriteBatch) : Disposable {
 
     fun beginCapture() {
         fbo1.begin()
-        Gdx.gl.glViewport(0, 0, w, h)
+        // fbo1.begin() already sets viewport to (0, 0, fbo_w, fbo_h)
         Gdx.gl.glClearColor(0f, 0f, 0f, 0f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     }
 
     fun endCapture() {
+        // fbo1.end() restores viewport to backBufferWidth/Height — don't override with logical size
         fbo1.end()
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
     }
 
     fun render() {
@@ -62,8 +62,8 @@ class BloomPass(private val batch: SpriteBatch) : Disposable {
         batch.draw(tex1, 0f, 0f, w.toFloat(), h.toFloat(),
                    0, 0, tex1.width, tex1.height, false, true)
         batch.end()
+        // fbo2.end() restores viewport to backBufferWidth/Height — don't override with logical size
         fbo2.end()
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
 
         val tex2 = fbo2.colorBufferTexture
 
