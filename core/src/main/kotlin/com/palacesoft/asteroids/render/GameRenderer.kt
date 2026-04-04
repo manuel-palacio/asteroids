@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.palacesoft.asteroids.game.World
 import com.palacesoft.asteroids.util.Settings
+import com.palacesoft.asteroids.vfx.VfxManager
 
 class GameRenderer(
     private val camera: OrthographicCamera,
@@ -18,6 +19,7 @@ class GameRenderer(
     private val astRenderer  = AsteroidRenderer()
     private val saucerRend   = SaucerRenderer()
     var hudRenderer: HudRenderer? = null
+    var vfx: VfxManager? = null
 
     // BloomPass plugged in Task 14
     var bloomPass: Any? = null
@@ -54,6 +56,9 @@ class GameRenderer(
             if (b.alive) sr.circle(b.x, b.y, b.radius)
         }
         sr.end()
+
+        // Pass 3b: Particles (after geometry, before HUD)
+        vfx?.renderParticles()
 
         // Pass 4: HUD (reset camera shake first)
         camera.position.set(Settings.WORLD_WIDTH / 2f, Settings.WORLD_HEIGHT / 2f, 0f)
