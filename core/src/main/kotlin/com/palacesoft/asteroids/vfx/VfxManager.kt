@@ -117,6 +117,8 @@ class VfxManager(private val sr: ShapeRenderer, private val batch: SpriteBatch) 
     }
 
     private fun onPlayerHit(e: GameEvent.PlayerHit) {
+        // Procedural debris — always visible at all quality levels
+        explosions.acquire()?.spawn(e.x, e.y, AsteroidSize.LARGE)
         shake.trigger(0.80f * fx.shakeMultiplier)
         if (fx.enableParticles) particles.spawnShipDeath(e.x, e.y)
     }
