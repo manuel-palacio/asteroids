@@ -20,6 +20,7 @@ class GameScreen(private val game: AsteroidsGame) : Screen {
     private var pipeline     = PostProcessingPipeline(game.batch)
 
     private var disposed = false
+    private var gameOverHandled = false
 
     init {
         renderer.hudRenderer  = HudRenderer(game.batch, game.camera)
@@ -44,7 +45,8 @@ class GameScreen(private val game: AsteroidsGame) : Screen {
               world.saucers.any { it.alive })
         renderer.update(dt, world)
         renderer.render(world, dt, vfx.offsetX, vfx.offsetY)
-        if (world.gameOver) {
+        if (world.gameOver && !gameOverHandled) {
+            gameOverHandled = true
             game.gameServices?.submitScore(world.score)
             game.setScreen(GameOverScreen(game, world.score))
         }
