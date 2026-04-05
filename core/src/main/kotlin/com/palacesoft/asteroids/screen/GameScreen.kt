@@ -44,7 +44,10 @@ class GameScreen(private val game: AsteroidsGame) : Screen {
               world.saucers.any { it.alive })
         renderer.update(dt, world)
         renderer.render(world, dt, vfx.offsetX, vfx.offsetY)
-        if (world.gameOver) game.setScreen(GameOverScreen(game, world.score))
+        if (world.gameOver) {
+            game.gameServices?.submitScore(world.score)
+            game.setScreen(GameOverScreen(game, world.score))
+        }
     }
 
     override fun resize(width: Int, height: Int) {
