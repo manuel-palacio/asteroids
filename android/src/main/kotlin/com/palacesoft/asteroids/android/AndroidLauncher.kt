@@ -11,6 +11,9 @@ class AndroidLauncher : AndroidApplication() {
         val config = AndroidApplicationConfiguration().apply {
             useImmersiveMode = true
         }
-        initialize(AsteroidsGame(), config)
+        val game = AsteroidsGame().also {
+            it.gameServices = GooglePlayServices(this)
+        }
+        initialize(game, config)
     }
 }
