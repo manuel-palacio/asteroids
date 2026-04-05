@@ -5,6 +5,7 @@ import com.palacesoft.asteroids.events.GameEventBus
 import com.palacesoft.asteroids.game.entity.*
 import com.palacesoft.asteroids.game.system.BulletPool
 import com.palacesoft.asteroids.game.system.CollisionSystem
+import com.palacesoft.asteroids.game.system.StreakSystem
 import com.palacesoft.asteroids.game.system.WaveSystem
 import com.palacesoft.asteroids.input.GameInput
 import com.palacesoft.asteroids.util.Settings
@@ -24,6 +25,8 @@ class World {
     var wave             = 0
     var gameOver         = false
     var waveMaxAsteroids = 1   // peak alive count this wave; denominator for danger ratio
+    var scoreMultiplier: Int = 1
+    val streakSystem = StreakSystem { mult -> scoreMultiplier = mult }
 
     val input            = GameInput()
     val bulletPool       = BulletPool()
@@ -41,6 +44,7 @@ class World {
 
     fun start() {
         waveSystem.start()
+        streakSystem.subscribe()
     }
 
     fun update(delta: Float) {
@@ -50,6 +54,7 @@ class World {
         updateAsteroids(delta)
         asteroids.removeAll { !it.alive }
         bullets.removeAll   { !it.alive }
+        streakSystem.update(delta)
         collisionSystem.update()
         waveSystem.update(delta)
         // Track peak alive count so the heartbeat danger ratio stays valid across splits
