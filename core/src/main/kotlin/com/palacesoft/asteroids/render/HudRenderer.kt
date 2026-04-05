@@ -16,13 +16,19 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
     private val viewport = FitViewport(Settings.WORLD_WIDTH, Settings.WORLD_HEIGHT, camera)
     val stage = Stage(viewport, batch)
 
-    private val font      = BitmapFont().apply { data.setScale(2f); color = Color.CYAN }
-    private val waveFont  = BitmapFont().apply { data.setScale(1.8f) }
-    private val popupFont = BitmapFont().apply { data.setScale(1.5f) }
+    private val font          = BitmapFont().apply { data.setScale(2f);   color = Color.CYAN }
+    private val waveFont      = BitmapFont().apply { data.setScale(1.8f) }
+    private val popupFont     = BitmapFont().apply { data.setScale(1.5f) }
+    private val bestHudFont   = BitmapFont().apply { data.setScale(1.6f); color = Color(0.7f, 0.7f, 0.7f, 1f) }
+    private val waveCountFont = BitmapFont().apply { data.setScale(1.4f); color = Color.WHITE }
+    private val multFont      = BitmapFont().apply { data.setScale(2.2f); color = Color.YELLOW }
 
-    private val scoreStyle  = Label.LabelStyle(font, Color.CYAN)
-    private val waveStyle   = Label.LabelStyle(waveFont, Color.WHITE)
-    private val popupStyle  = Label.LabelStyle(popupFont, Color.YELLOW)
+    private val scoreStyle     = Label.LabelStyle(font, Color.CYAN)
+    private val waveStyle      = Label.LabelStyle(waveFont, Color.WHITE)
+    private val popupStyle     = Label.LabelStyle(popupFont, Color.YELLOW)
+    private val bestHudStyle   = Label.LabelStyle(bestHudFont, Color(0.7f, 0.7f, 0.7f, 1f))
+    private val waveCountStyle = Label.LabelStyle(waveCountFont, Color.WHITE)
+    private val multStyle      = Label.LabelStyle(multFont, Color.YELLOW)
 
     private val scoreLabel = Label("0", scoreStyle).apply {
         setPosition(20f, Settings.WORLD_HEIGHT - 40f)
@@ -36,12 +42,22 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
         setAlignment(Align.center)
         color.a = 0f
     }
+    private val bestLabel = Label("", bestHudStyle).apply {
+        setWidth(Settings.WORLD_WIDTH)
+        setPosition(0f, Settings.WORLD_HEIGHT - 40f)
+        setAlignment(Align.center)
+    }
+    private val waveCountLabel = Label("", waveCountStyle).apply {
+        setWidth(Settings.WORLD_WIDTH)
+        setPosition(0f, Settings.WORLD_HEIGHT - 78f)
+        setAlignment(Align.center)
+        color.a = 0.7f
+    }
+    private val multiplierLabel = Label("", multStyle).apply {
+        setPosition(160f, Settings.WORLD_HEIGHT - 40f)
+        color.a = 0f
+    }
 
-    private var lastScore = -1
-    private var lastWave  = -1
-    private var lastLives = -1
-
-    // ── Tutorial hints ────────────────────────────────────────────────────────
     private val tutorialHintStyle = Label.LabelStyle(BitmapFont().apply { data.setScale(1.6f) }, Color.WHITE)
     private val hintLabel = Label("", tutorialHintStyle).apply {
         setWidth(Settings.WORLD_WIDTH)
@@ -51,27 +67,57 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
     }
     private var hintShown = false
 
+    private var lastScore         = -1
+    private var lastLives         = -1
+    private var lastWave          = -1
+    private var lastHighScore     = -1
+    private var lastWaveForCount  = -1
+    private var lastAsteroidCount = -1
+    private var lastMultiplier    = -1
+
     init {
         stage.addActor(scoreLabel)
         stage.addActor(livesLabel)
         stage.addActor(waveLabel)
+        stage.addActor(bestLabel)
+        stage.addActor(waveCountLabel)
+        stage.addActor(multiplierLabel)
         stage.addActor(hintLabel)
     }
 
     fun render(world: World) {
-        // Score
         if (world.score != lastScore) {
             val delta = world.score - lastScore
             lastScore = world.score
             scoreLabel.setText(world.score.toString())
             if (delta > 0) spawnScorePopup(delta)
         }
-        // Lives
         if (world.lives != lastLives) {
             lastLives = world.lives
             livesLabel.setText("△ ".repeat(world.lives.coerceAtLeast(0)))
         }
-        // Wave banner
+        val best = Settings.highScore
+        if (best != lastHighScore) {
+            lastHighScore = best
+            if (best > 0) bestLabel.setText("BEST  $best")
+        }
+        val liveCount = world.asteroids.count { it.alive }
+        if (world.wave != lastWaveForCount || liveCount != lastAsteroidCount) {
+            lastWaveForCount  = world.wave
+            lastAsteroidCount = liveCount
+            if (world.wave > 0) waveCountLabel.setText("WAVE ${world.wave}  ·  $liveCount LEFT")
+        }
+        val mult = world.streakSystem.multiplier
+        if (mult != lastMultiplier) {
+            lastMultiplier = mult
+            multiplierLabel.clearActions()
+            if (mult > 1) {
+                multiplierLabel.setText("${mult}×")
+                multiplierLabel.color.a = 1f
+            } else {
+                multiplierLabel.addAction(Actions.fadeOut(0.5f))
+            }
+        }
         if (world.wave != lastWave && world.wave > 0) {
             lastWave = world.wave
             waveLabel.setText("WAVE ${world.wave}")
@@ -83,8 +129,6 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
                 Actions.fadeOut(0.6f)
             ))
         }
-
-        // Tutorial hint: controls reminder on first wave only
         if (!Settings.tutorialCompleted && world.wave == 1 && !hintShown) {
             hintShown = true
             hintLabel.setText("◁ ROTATE  ▲ THRUST  ▷ ROTATE     FIRE     ★ HYPERSPACE")
@@ -97,7 +141,6 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
                 Actions.fadeOut(0.8f)
             ))
         }
-
         stage.act()
         stage.draw()
     }
@@ -122,6 +165,9 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
         font.dispose()
         waveFont.dispose()
         popupFont.dispose()
+        bestHudFont.dispose()
+        waveCountFont.dispose()
+        multFont.dispose()
         tutorialHintStyle.font.dispose()
     }
 }
