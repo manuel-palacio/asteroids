@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Replace these placeholder values with IDs from Google Play Console
+  after registering the game under Play Games Services.
+  See: https://developers.google.com/games/services/android/quickstart
+-->
+<resources>
+    <string name="app_id" translatable="false">YOUR_APP_ID</string>
+    <string name="leaderboard_high_score" translatable="false">YOUR_LEADERBOARD_ID</string>
+</resources>
