@@ -13,6 +13,7 @@ class AsteroidsGame : Game() {
     lateinit var sr: ShapeRenderer
     lateinit var camera: OrthographicCamera
     lateinit var sounds: SoundManager
+    var gameServices: GameServices? = null
 
     override fun create() {
         batch  = SpriteBatch()
