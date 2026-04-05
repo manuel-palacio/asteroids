@@ -28,7 +28,8 @@ class CollisionSystem(private val world: World) {
                 if (circlesOverlap(bullet.x, bullet.y, bullet.radius, ast.x, ast.y, ast.radius)) {
                     bullet.alive = false
                     ast.alive = false
-                    world.score += ast.size.score
+                    val points = ast.size.score * world.scoreMultiplier
+                    world.score += points
                     when (ast.size) {
                         AsteroidSize.LARGE  -> world.sounds?.playBangLarge()
                         AsteroidSize.MEDIUM -> world.sounds?.playBangMedium()
@@ -36,7 +37,7 @@ class CollisionSystem(private val world: World) {
                     }
                     toAdd.addAll(AsteroidFactory.split(ast))
                     GameEventBus.emit(GameEvent.AsteroidDestroyed(ast.x, ast.y, ast.size))
-                    GameEventBus.emit(GameEvent.ScoreAwarded(ast.x, ast.y, ast.size.score))
+                    GameEventBus.emit(GameEvent.ScoreAwarded(ast.x, ast.y, points))
                     break
                 }
             }
@@ -52,7 +53,7 @@ class CollisionSystem(private val world: World) {
                 if (circlesOverlap(bullet.x, bullet.y, bullet.radius, saucer.x, saucer.y, saucer.radius)) {
                     bullet.alive = false
                     saucer.alive = false
-                    val saucerScore = if (saucer.size == SaucerSize.LARGE) 200 else 1000
+                    val saucerScore = (if (saucer.size == SaucerSize.LARGE) 200 else 1000) * world.scoreMultiplier
                     world.score += saucerScore
                     world.sounds?.playBangLarge()
                     GameEventBus.emit(GameEvent.SaucerDestroyed(saucer.x, saucer.y))
