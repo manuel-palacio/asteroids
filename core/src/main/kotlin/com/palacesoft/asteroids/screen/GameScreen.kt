@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.palacesoft.asteroids.AsteroidsGame
 import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.util.Settings
 import com.palacesoft.asteroids.input.InputHandler
 import com.palacesoft.asteroids.events.GameEventBus
 import com.palacesoft.asteroids.render.GameRenderer
@@ -48,7 +49,9 @@ class GameScreen(private val game: AsteroidsGame) : Screen {
         if (world.gameOver && !gameOverHandled) {
             gameOverHandled = true
             game.gameServices?.submitScore(world.score)
-            game.setScreen(GameOverScreen(game, world.score))
+            val previousBest = Settings.highScore
+            if (world.score > previousBest) Settings.highScore = world.score
+            game.setScreen(GameOverScreen(game, world.score, previousBest))
         }
     }
 

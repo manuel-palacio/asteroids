@@ -1,5 +1,6 @@
 package com.palacesoft.asteroids.util
 
+import com.badlogic.gdx.Gdx
 import com.palacesoft.asteroids.effects.EffectQuality
 import com.palacesoft.asteroids.effects.FxSettings
 import com.palacesoft.asteroids.effects.fxSettingsFor
@@ -14,6 +15,14 @@ object Settings {
     val bloomEnabled get() = fxSettings.enableBloom
 
     var sfxEnabled         = true
+
+    var highScore: Int
+        get() = Gdx.app?.getPreferences("asteroids")?.getInteger("highScore", 0) ?: 0
+        set(value) {
+            val prefs = Gdx.app?.getPreferences("asteroids") ?: return
+            prefs.putInteger("highScore", value)
+            prefs.flush()
+        }
 
     /** Active touch control scheme. BUTTONS preserves the original feel; JOYSTICK suits players who prefer analogue-style input. */
     var touchScheme: TouchScheme = TouchScheme.BUTTONS
