@@ -76,6 +76,7 @@ class GameRenderer(
         camera.update()
         hudRenderer?.render(world)
         sr.projectionMatrix = camera.combined
+        hudRenderer?.renderLivesIcons(sr, world.lives)
         inputHandler?.renderTouchOverlay(sr, batch)
     }
 

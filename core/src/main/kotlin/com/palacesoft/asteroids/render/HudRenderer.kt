@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -32,9 +33,6 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
 
     private val scoreLabel = Label("0", scoreStyle).apply {
         setPosition(20f, Settings.WORLD_HEIGHT - 40f)
-    }
-    private val livesLabel = Label("", scoreStyle).apply {
-        setPosition(Settings.WORLD_WIDTH - 200f, Settings.WORLD_HEIGHT - 40f)
     }
     private val waveLabel = Label("", waveStyle).apply {
         setWidth(Settings.WORLD_WIDTH)
@@ -68,7 +66,6 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
     private var hintShown = false
 
     private var lastScore         = -1
-    private var lastLives         = -1
     private var lastWave          = -1
     private var lastHighScore     = -1
     private var lastWaveForCount  = -1
@@ -77,7 +74,6 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
 
     init {
         stage.addActor(scoreLabel)
-        stage.addActor(livesLabel)
         stage.addActor(waveLabel)
         stage.addActor(bestLabel)
         stage.addActor(waveCountLabel)
@@ -91,10 +87,6 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
             lastScore = world.score
             scoreLabel.setText(world.score.toString())
             if (delta > 0) spawnScorePopup(delta)
-        }
-        if (world.lives != lastLives) {
-            lastLives = world.lives
-            livesLabel.setText("△ ".repeat(world.lives.coerceAtLeast(0)))
         }
         val best = Settings.highScore
         if (best != lastHighScore) {
@@ -156,6 +148,37 @@ class HudRenderer(batch: SpriteBatch, camera: OrthographicCamera) {
             Actions.removeActor()
         ))
         stage.addActor(popup)
+    }
+
+    /**
+     * Draws N small ship silhouettes in the top-right corner, one per remaining life.
+     * Must be called after the Stage draws and after sr.projectionMatrix is set to the
+     * HUD (shake-free) camera. Uses the same 4-line hull geometry as ShipRenderer.
+     */
+    fun renderLivesIcons(sr: ShapeRenderer, lives: Int) {
+        if (lives <= 0) return
+        val r      = 11f                         // icon radius in world units
+        val cy     = Settings.WORLD_HEIGHT - 28f // vertical centre of icons
+        val startX = Settings.WORLD_WIDTH - 28f  // rightmost icon centre x
+        val spacing = 36f
+
+        // Precomputed hull offsets for nose-up orientation (rad = π/2).
+        // Matches ShipRenderer geometry exactly, scaled to r.
+        val nx =  0f;       val ny =  r           // nose
+        val lx = -5.95f * r / 10f; val ly = -7.00f * r / 10f  // left wing
+        val rx =  5.61f * r / 10f; val ry = -7.40f * r / 10f  // right wing
+        val bx =  0f;       val by = -r * 0.35f   // rear notch
+
+        sr.begin(ShapeRenderer.ShapeType.Line)
+        sr.setColor(0f, 1f, 1f, 1f)  // CYAN, matching score label
+        for (i in 0 until lives) {
+            val cx = startX - i * spacing
+            sr.line(cx + nx, cy + ny, cx + lx, cy + ly)
+            sr.line(cx + lx, cy + ly, cx + bx, cy + by)
+            sr.line(cx + bx, cy + by, cx + rx, cy + ry)
+            sr.line(cx + rx, cy + ry, cx + nx, cy + ny)
+        }
+        sr.end()
     }
 
     fun resize(width: Int, height: Int) = viewport.update(width, height, true)

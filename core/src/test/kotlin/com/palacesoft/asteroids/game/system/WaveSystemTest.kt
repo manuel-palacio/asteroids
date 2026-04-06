@@ -1,10 +1,18 @@
 package com.palacesoft.asteroids.game.system
 
 import com.palacesoft.asteroids.game.World
+import com.palacesoft.asteroids.util.Settings
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class WaveSystemTest {
+
+    @BeforeEach fun setUp() {
+        // Bypass the scripted tutorial wave so spawnWave() always uses normal rules.
+        Settings.tutorialCompleted = true
+    }
+
     @Test fun `wave 1 spawns 4 asteroids`() {
         val world = World().apply { wave = 1 }
         world.waveSystem.spawnWave()
